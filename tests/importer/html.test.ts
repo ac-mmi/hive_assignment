@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inspectCommentHtml, sanitizeCommentHtml } from "@/lib/importer/html";
+import { inspectCommentHtml, isCommentHtmlEmpty, sanitizeCommentHtml } from "@/lib/importer/html";
 
 describe("comment HTML safety", () => {
   it("keeps paragraph text and flags the real YouTube wrapper as unsupported", () => {
@@ -21,5 +21,25 @@ describe("comment HTML safety", () => {
     expect(safe).not.toContain("onclick");
     expect(safe).not.toContain("javascript:");
     expect(safe).toContain("ok");
+  });
+
+  it("keeps strikethrough used by the comment editor", () => {
+    const safe = sanitizeCommentHtml("<p>Keep <s>old</s> text</p>");
+    expect(safe).toContain("<s>old</s>");
+  });
+});
+
+describe("empty comment HTML", () => {
+  it("treats empty editor markup as empty", () => {
+    expect(isCommentHtmlEmpty("")).toBe(true);
+    expect(isCommentHtmlEmpty("<p></p>")).toBe(true);
+    expect(isCommentHtmlEmpty("<p><br></p>")).toBe(true);
+    expect(isCommentHtmlEmpty("   ")).toBe(true);
+  });
+
+  it("does not treat real comment text as empty", () => {
+    expect(isCommentHtmlEmpty("<p>Roof flashing showed signs of severe corrosion.</p>")).toBe(
+      false,
+    );
   });
 });

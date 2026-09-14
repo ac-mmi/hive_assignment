@@ -7,6 +7,7 @@ const ALLOWED_TAGS = new Set([
   "b",
   "em",
   "i",
+  "s",
   "br",
   "ul",
   "ol",
@@ -145,4 +146,22 @@ export function sanitizeCommentHtml(html: string): string {
   parser.write(html);
   parser.end();
   return out;
+}
+
+/**
+ * True when HTML would not show any comment text (empty editor, `<p></p>`, whitespace).
+ */
+export function isCommentHtmlEmpty(html: string): boolean {
+  const sanitized = sanitizeCommentHtml(html);
+  const text = sanitized
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text.length === 0;
 }

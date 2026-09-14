@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { sanitizeCommentHtml } from "@/lib/importer/html";
+import { isCommentHtmlEmpty, sanitizeCommentHtml } from "@/lib/importer/html";
+import { CommentRichTextEditor } from "./CommentRichTextEditor";
 import type { EditorField, EditorItem, EditorSection } from "./types";
 
 type Selection =
@@ -154,8 +155,8 @@ function FieldEditor({
       {field.supportStatus === "partial" ? (
         <p className="mt-3 rounded border border-line bg-paper px-3 py-2 text-sm">
           This comment is present in the Spectora export but includes HTML this importer
-          cannot render yet. The original source HTML is stored below. Empty Spectora
-          cells are a different case: they were missing from the export, not dropped here.
+          cannot render yet. Supported text is shown in the editor. Empty Spectora cells
+          are a different case: they were missing from the export, not dropped here.
         </p>
       ) : null}
       {field.options.length > 0 ? (
@@ -178,7 +179,7 @@ function FieldEditor({
           setError(null);
           setStatus("Saving…");
           try {
-            const textHtml = text.trim() === "" ? null : text;
+            const textHtml = isCommentHtmlEmpty(text) ? null : sanitizeCommentHtml(text);
             await patchJson(`/api/fields/${field.id}`, { textHtml });
             onSaved(textHtml);
             setStatus("Saved");
@@ -188,14 +189,13 @@ function FieldEditor({
           }
         }}
       >
-        <label className="block text-sm font-medium">
-          Comment text
-          <textarea
-            className="mt-2 min-h-48 w-full rounded border border-line bg-white px-3 py-2 font-mono text-sm"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
+        <div>
+          <p className="text-sm font-medium">Comment</p>
+          <CommentRichTextEditor
+            initialHtml={field.textHtml ?? ""}
+            onChange={setText}
           />
-        </label>
+        </div>
         <button
           type="submit"
           className="mt-4 rounded-full bg-accent px-4 py-2 text-sm font-medium text-white"
@@ -209,7 +209,8 @@ function FieldEditor({
       <div className="mt-6 border-t border-line pt-4">
         <p className="text-sm font-medium">Sanitized preview</p>
         <p className="mt-1 text-xs text-muted">
-          Scripts and unsafe attributes are not executed. Original HTML remains stored.
+          Scripts and unsafe attributes are not executed. Preview uses the same sanitizer
+          as the rest of the app.
         </p>
         <div
           className="comment-preview mt-3 space-y-2 text-sm leading-6"

@@ -30,7 +30,7 @@ export async function importSpectoraWorkbook(
 }
 
 export { FatalImportError } from "./fatal";
-export { inspectCommentHtml, sanitizeCommentHtml } from "./html";
+export { inspectCommentHtml, isCommentHtmlEmpty, sanitizeCommentHtml } from "./html";
 export { parseXlsxGrid } from "./parse-xlsx";
 export { sniffSpreadsheet } from "./sniff";
 export type { ImportedTemplate, ImportSummary, ImportIssue } from "./types";
