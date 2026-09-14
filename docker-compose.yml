@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hive
+      POSTGRES_DB: hive
+    ports:
+      - "5432:5432"
+    volumes:
+      - hive_pg:/var/lib/postgresql/data
+
+volumes:
+  hive_pg:
